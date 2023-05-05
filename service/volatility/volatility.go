@@ -1,8 +1,7 @@
 package volatility
 
 import (
-	"net/http"
-
+	"github.com/ATMackay/go-quantifier/fetcher"
 	"github.com/ATMackay/go-quantifier/rpc"
 
 	"github.com/sirupsen/logrus"
@@ -16,12 +15,7 @@ type Config struct {
 }
 
 type Service struct {
-	logger *logrus.Entry
-	server rpc.Server
-}
-
-func BuildService(config Config) (*Service, error) {
-	log := logrus.NewEntry(logrus.StandardLogger())
-	h := http.Server{}
-	return &Service{logger: log, server: &h}, nil
+	logger  *logrus.Entry
+	fetcher fetcher.Fetcher
+	server  rpc.Server
 }
