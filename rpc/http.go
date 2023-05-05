@@ -1,44 +1,74 @@
 package rpc
 
 import (
-	"bytes"
-	"encoding/json"
+	"context"
 	"fmt"
-	"io"
 	"net/http"
+	"time"
+
+	"github.com/ATMackay/go-quantifier/logger"
+	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 )
 
-func doPost(path string, request interface{}) (*http.Response, error) {
-	b, err := json.Marshal(request)
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := http.Post(path, "application/json", bytes.NewReader(b))
-	if e := handleResponseErr(resp, err); e != nil {
-		return resp, e
-	}
-	return resp, nil
+type HTTPService struct {
+	port   int
+	server Server
+	logger *logrus.Entry
 }
 
-func handleResponseErr(resp *http.Response, err error) error {
-	if err != nil {
-		return err
+func NewHTTPService(port int, api *Api, l *logrus.Entry) HTTPService {
+	handler := api.Routes()
+	handler.Use(logger.LogHTTPRequest(l))
+
+	return HTTPService{
+		port: port,
+		server: &http.Server{
+			Addr:              fmt.Sprintf(":%d", port),
+			Handler:           handler,
+			ReadHeaderTimeout: 20 * time.Second,
+		},
+		logger: l,
 	}
-	if resp.StatusCode != 200 {
-		var v jsonErr
-		if err := json.NewDecoder(resp.Body).Decode(&v); err != nil {
-			return fmt.Errorf("cannot parse JSON body from error response: %w", err)
+}
+
+type Api struct {
+	Endpoints []EndPoint
+}
+
+type EndPoint struct {
+	path        string
+	handlerFunc http.HandlerFunc
+	methodType  string
+}
+
+func NewEndpoint(path, methodType string, handler http.HandlerFunc) EndPoint {
+	return EndPoint{
+		path:        path,
+		handlerFunc: handler,
+		methodType:  methodType,
+	}
+}
+
+func (api Api) Routes() *mux.Router {
+	router := mux.NewRouter()
+	for _, e := range api.Endpoints {
+		router.Handle(e.path, e.handlerFunc).Methods(e.methodType)
+	}
+	return router
+}
+
+func (service *HTTPService) Start() {
+	go func() {
+		if err := service.server.ListenAndServe(); err != nil {
+			service.logger.WithFields(logrus.Fields{"error": err}).Warn("serverTerminated")
 		}
-		return fmt.Errorf(v.Err)
-	}
-	return nil
+	}()
 }
 
-type jsonErr struct {
-	Err string `json:"error"`
-}
-
-func decodeJSON(r io.Reader, v interface{}) error {
-	return json.NewDecoder(r).Decode(v)
+func (service *HTTPService) Stop() error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	err := service.server.Shutdown(ctx)
+	return err
 }
