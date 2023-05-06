@@ -13,12 +13,12 @@ type Service struct {
 }
 
 func (s *Service) Start() {
-	s.logger.Info("starting")
+	s.logger.Info("startingVolatilityService")
 	s.server.Start()
 }
 
 func (s *Service) Stop() {
-	s.logger.Info("stopping")
+	s.logger.Info("stoppingVolatilityService")
 	if err := s.server.Stop(); err != nil {
 		s.logger.WithFields(logrus.Fields{"error": err}).Error("errorStoppingServer")
 	}

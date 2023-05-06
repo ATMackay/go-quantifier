@@ -5,10 +5,6 @@ import (
 	"net/http"
 )
 
-type ResponseWriter http.ResponseWriter
-type Request http.Request
-type Response http.Response
-
 type Server interface {
 	ListenAndServe() error
 	Shutdown(ctx context.Context) error

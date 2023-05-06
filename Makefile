@@ -9,7 +9,7 @@ test:
 	@ go test -v ./...	
 
 volatility:
-	$(GOBIULD) cmd/volatility/main.go
-	@mv cmd/indexer ./build
-	@echo "Run \"./build/volatility\" to launch volatility server."
+	@$(GOBUILD) cmd/volatility/main.go 
+	@mv main ./build/volatility
+	@echo "Run \"./build/volatility --config cmd/volatility/vol.yml\" to launch volatility server."
 	@echo "Done building."
