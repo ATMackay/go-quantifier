@@ -1,4 +1,5 @@
 port: 8000
+path: db
 loglevel: debug
 logformat: plain
 logtofile: false

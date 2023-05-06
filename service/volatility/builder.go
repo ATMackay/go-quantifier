@@ -3,6 +3,7 @@ package volatility
 import (
 	"net/http"
 
+	"github.com/ATMackay/go-quantifier/database"
 	"github.com/ATMackay/go-quantifier/fetcher"
 	"github.com/ATMackay/go-quantifier/logger"
 	"github.com/ATMackay/go-quantifier/rpc"
@@ -14,9 +15,14 @@ func BuildService(config Config) (*Service, error) {
 	if err != nil {
 		return nil, err
 	}
+	db, err := database.NewBadgerWithLogger(config.Path, false, log.Logger)
+	if err != nil {
+		return nil, err
+	}
 	apis := makeAPIHandlers()
 	return &Service{
 		logger:  log.Logger,
+		db:      db,
 		fetcher: fetcher.NewAlphaFetcher(&http.Client{}, config.ApiKey),
 		server:  rpc.NewHTTPService(config.Port, &apis, log.Logger)}, nil
 }

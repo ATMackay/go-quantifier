@@ -1,6 +1,7 @@
 package volatility
 
 import (
+	"github.com/ATMackay/go-quantifier/database"
 	"github.com/ATMackay/go-quantifier/fetcher"
 	"github.com/ATMackay/go-quantifier/rpc"
 	"github.com/sirupsen/logrus"
@@ -8,6 +9,7 @@ import (
 
 type Service struct {
 	logger  *logrus.Entry
+	db      database.Database
 	fetcher fetcher.Fetcher
 	server  rpc.HTTPService
 }
