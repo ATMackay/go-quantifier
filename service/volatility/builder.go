@@ -19,17 +19,15 @@ func BuildService(config Config) (*Service, error) {
 	if err != nil {
 		return nil, err
 	}
-	apis := makeAPIHandlers()
 	return &Service{
 		logger:  log.Logger,
 		db:      db,
 		fetcher: fetcher.NewAlphaFetcher(&http.Client{}, config.ApiKey),
-		server:  rpc.NewHTTPService(config.Port, &apis, log.Logger)}, nil
+		server:  rpc.NewHTTPService(config.Port, makeAPIHandlers(), log.Logger)}, nil
 }
 
-func makeAPIHandlers() rpc.Api {
-	return rpc.Api{
-		Endpoints: []rpc.EndPoint{rpc.NewEndpoint("/hello", http.MethodGet, Hello)},
-	}
-
+func makeAPIHandlers() *rpc.Api {
+	r := &rpc.Api{}
+	r.AddEndpoint(rpc.NewEndpoint("/hello", http.MethodGet, Hello))
+	return r
 }
