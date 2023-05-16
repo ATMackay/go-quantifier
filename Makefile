@@ -6,7 +6,7 @@ GOBUILD = env GO111MODULE=on go build
 
 test:
 	@echo "Running tests..."
-	@ go test -v ./...	
+	@ go test -cover ./...	
 
 volatility:
 	@$(GOBUILD) cmd/volatility/main.go 

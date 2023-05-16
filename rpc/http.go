@@ -73,6 +73,5 @@ func (service *HTTPService) Start() {
 func (service *HTTPService) Stop() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	err := service.server.Shutdown(ctx)
-	return err
+	return service.server.Shutdown(ctx)
 }

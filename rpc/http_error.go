@@ -1,17 +1,9 @@
 package rpc
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 )
-
-func RespondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
-	response, _ := json.Marshal(payload)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-	_, _ = w.Write(response)
-}
 
 func RespondWithError(w http.ResponseWriter, code int, msg interface{}) {
 	var message string
@@ -21,7 +13,7 @@ func RespondWithError(w http.ResponseWriter, code int, msg interface{}) {
 	case string:
 		message = m
 	}
-	RespondWithJSON(w, code, map[string]string{"error": message})
+	_ = RespondWithJSON(w, code, map[string]string{"error": message})
 }
 
 func HandleResponseErr(resp *http.Response) error {
